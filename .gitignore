@@ -1,0 +1,56 @@
+# See https://help.github.com/ignore-files/ for more about ignoring files.
+
+# misc
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OSX
+.DS_Store
+
+# Xcode
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+app/ios/xcuserdata
+*.xccheckout
+*.moved-aside
+DerivedData
+*.hmap
+*.ipa
+*.xcuserstate
+app/ios/project.xcworkspace
+app/ios/build/
+app/ios/*.pbxuser
+app/ios/Pods
+
+# Android
+app/android/app/build
+app/android/.idea
+app/android/.gradle
+*.iml
+
+# node.js
+node_modules
+npm-debug.log
+yarn-error.log
+package-lock.json
+
+# Bundle artifact
+*.jsbundle
+
+# Editor
+.vscode
+
+# firebase
+app/ios/GoogleService-Info.plist
+app/android/app/google-services.json
