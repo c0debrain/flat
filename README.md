@@ -61,7 +61,7 @@ Modify app/android/local.properties to fit to your environment.
 2. Deploy function to Firebase. ( see /firebase )
 3. Setup push notification in iOS developer portal and in Firebase.
 
-## We are working on detailed document.
+**We are working on detailed document now. Please watch this repository to keep updated**
 
 ### License
 Flat Messenger uses MIT License.
