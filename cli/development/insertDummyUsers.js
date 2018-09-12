@@ -4,20 +4,21 @@ var Chance = require('chance');
 var chance = new Chance();
 var fetch = require('node-fetch');
 
+var settings = require('./settings');
 var serviceAccount = require("../serviceAccountKey.json");
 
 firebase.initializeApp({
     credential: firebase.credential.cert(serviceAccount),
-    databaseURL: "https://sirius-70e10.firebaseio.com"
+    databaseURL: settings.firestoreURL
 });
 
 // constants
-const NUMBER_OF_USERS = 20;
+const NUMBER_OF_USERS = 50;
 
 
 const firestore = firebase.firestore();
-const settings = {timestampsInSnapshots: true};
-firestore.settings(settings);
+const firestoreSettings = {timestampsInSnapshots: true};
+firestore.settings(firestoreSettings);
 
 const database = firebase.database();
 
@@ -55,7 +56,8 @@ const profileCollection = firestore.collection('profiles');
     };
   
     await profileCollection.add(insertData);
-
+    console.log("saved ",telephoneNumber);
+    
     /*
     // insert history
     var ref = database.ref('/history/' + userId);
@@ -66,7 +68,10 @@ const profileCollection = firestore.collection('profiles');
     });
     */
 
-
   }
+
+  console.log('Finished');
+  process.exit(0);
+
 
 })();

@@ -18,8 +18,6 @@ Flat messenger is comprihensive opensource messenger app based on React Native &
 
 Here is step by step tutorial to build the app.
 
-**We are working on web site which will be much better tutorial**
-
 #### Setup Firebase
 1. Create Firebase Project
 2. Define iOS Bundle Identifier and Android applicationId

@@ -9,11 +9,14 @@ import pushNotificationHandler from './src/lib/PushNotificationHandler';
 // Screens
 import AppRoot from './src/views/AppRoot';
 
+// debug settings
+//console.disableYellowBox = true; 
+
 class App extends React.Component {
 
   constructor(props) {
     super(props);
-
+    
     messengerEventHandler.setStore(store);
     pushNotificationHandler.setStore(store);
   }

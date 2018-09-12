@@ -3,40 +3,17 @@ var moment = require('moment');
 var Chance = require('chance');
 var chance = new Chance();
 
+var settings = require('./settings');
 var serviceAccount = require("../serviceAccountKey.json");
 
 firebase.initializeApp({
     credential: firebase.credential.cert(serviceAccount),
-    databaseURL: "https://sirius-70e10.firebaseio.com"
+    databaseURL: settings.firestoreURL
 });
 
 // constants
-const TARGET_USERS = [
-    "271d8670db9749b69e49065594cc",
-    "ed50781422a27a68f02012faf99d",
-    "57ea5191966de7c208788b818e7f",
-    "567a2e6c6a7cc040b3018b711d17",
-    "3ab2ab462f8498d4dd24464691af",
-    "fa9809084f6315362bfe3335fe92",
-    "206292f38388573dd9ca92a87eef",
-    "e49b31134618a842ab9979ba6aa8",
-    "598b0d522c1f0e47389a87d0d95d",
-    "d7978f7dfe3f971fb49451e8190d",
-    "af7ed0678a604bbb994937bc9b4a",
-    "9b1a04ca69dc79c3086a64f354eb",
-    "d7978f7dfe3f971fb49451e8190d",
-    "af7ed0678a604bbb994937bc9b4a",
-    "0baa8a7fd1147e3bfad012abf067",
-    "16e413785975626719c848eab5f2",
-    "be9840f8a281761acb391a185e8c",
-    "8593dd6f8ae9f1633f3eeabb0616",
-    "SQz4pxVyo9YU9naTaGrfZL6hQlm2",
-    "6d92682ffab213bee26ae03453a4",
-    "a72edf6594896255465121e9b4e5",
-    "888e556a763a05f9fdfe5fa62964",
-    "9bbb7aa32ed93cb6e7aa4a3c2776"
-    
-];
+const TARGET_USERS = settings.messageUsers;
+
 const MESSAGES = [
   "Hello!",
   "Good morning.",
@@ -63,8 +40,8 @@ const MESSAGES = [
 ]
 
 const firestore = firebase.firestore();
-const settings = {timestampsInSnapshots: true};
-firestore.settings(settings);
+const firestoreSettings = {timestampsInSnapshots: true};
+firestore.settings(firestoreSettings);
 
 const database = firebase.database();
 
@@ -121,6 +98,7 @@ const sendRandomMessage = async (userId,chatId) => {
       if (writeOnce) {
         writeOnce = false;
         const result = await messageRef.set(message);
+        console.log(result);
       }
 
       messageRef.off();

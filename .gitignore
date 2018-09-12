@@ -54,3 +54,4 @@ package-lock.json
 # firebase
 app/ios/GoogleService-Info.plist
 app/android/app/google-services.json
+cli/serviceAccountKey.json

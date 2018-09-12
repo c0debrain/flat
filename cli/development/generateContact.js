@@ -1,20 +1,21 @@
 var firebase = require("firebase-admin");
 var moment = require('moment');
 
+var settings = require('./settings');
 var serviceAccount = require("../serviceAccountKey.json");
 
 firebase.initializeApp({
     credential: firebase.credential.cert(serviceAccount),
-    databaseURL: "https://sirius-70e10.firebaseio.com"
+    databaseURL: settings.firestoreURL
 });
 
 // constants
 const NUMBER_OF_USERS = 20;
-const TARGET_USER = "SQz4pxVyo9YU9naTaGrfZL6hQlm2";
+const TARGET_USER = settings.targetUser1;
 
 const firestore = firebase.firestore();
-const settings = {timestampsInSnapshots: true};
-firestore.settings(settings);
+const firestoreSettings = {timestampsInSnapshots: true};
+firestore.settings(firestoreSettings);
 
 const database = firebase.database();
 
