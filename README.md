@@ -2,6 +2,9 @@
 # Flat Messenger
 ## Opensource Messenger App based on React Native & Firebase 
 
+![Trailer Video](https://github.com/cloverstudio/flat/blob/master/docs/trailer.gif?raw=true "Trailer Video")
+
+
 Flat messenger is comprihensive opensource messenger app based on React Native & Firebase.
 
 ### Why Flat Messenger ?
