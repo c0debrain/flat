@@ -14,6 +14,8 @@ Flat messenger is comprihensive opensource messenger app based on React Native &
 
 ### Build
 
+**First of all, you have to setup everything you need to develop React Native app. If you are beginner please go through [official document](https://facebook.github.io/react-native/) and setup environment.**
+
 Here is step by step tutorial to build the app.
 
 **We are working on web site which will be much better tutorial**
@@ -24,8 +26,6 @@ Here is step by step tutorial to build the app.
 3. Add iOS app in Firebase
 4. Download "GoogleService-Info.plist"
 5. Add Android app in Firebase 
-If you didn't change package name manually input "com.cloverstudio.flat" for package name at this moment.
-
 6. Download "google-services.json"
 7. Put "GoogleService-Info.plist" under app/ios
 8. Put "google-services.json" under app/android/app
@@ -50,11 +50,18 @@ Open app/ios/FlatMessenger.xcworkspace and chanege Bundle Identifier
 
 Change applicationId in app/android/app/build.gradle
 
+Chante project.ext.react in app/android/app/build.gradle
+
 Modify app/android/local.properties to fit to your environment.
 
 ```$ npm run android```
 
+#### What you need to do to enable all features.
+1. Enable, Firestore, Realtime Database, Auth by telephone number, FCM, Ftorega in Firebase.
+2. Deploy function to Firebase. ( see /firebase )
+3. Setup push notification in iOS developer portal and in Firebase.
 
+## We are working on detailed document.
 
 ### License
 Flat Messenger uses MIT License.
