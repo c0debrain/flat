@@ -44,6 +44,6 @@
     "redux-thunk": "^2.3.0",
     "rn-fetch-blob": "^0.10.12",
     "shallowequal": "1.0.2",
-    "uuid": "^3.2.1"
+    "uuid": "^3.3.2"
   }
 }

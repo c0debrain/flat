@@ -5,7 +5,9 @@ import {
   Text,
   View,
   TouchableOpacity,
-  PixelRatio
+  PixelRatio,
+  Platform,
+  Animated
 } from "react-native";
 
 import { GiftedChat } from '../../../components/giftedchat/GiftedChat'
@@ -30,15 +32,24 @@ import AvatarImage from "../../../components/AvatarImage";
 import BaseComponent from "../../BaseContainer";
 import * as actions from "../../../../actions";
 import * as utils from "../../../../lib/myutils";
+import consts from '../../../../lib/constants';
+
+import {l10n} from "../../../../lib/lang";
+import RNFetchBlob from 'rn-fetch-blob'
+import ImagePicker from 'react-native-image-crop-picker';
+
+import uuid from 'uuid';
 
 const deviceHeight = Dimensions.get("window").height;
 const deviceWidth = Dimensions.get("window").width;
 const headerHeight = PixelRatio.getPixelSizeForLayoutSize(32);
 
+const initialDrawerPosition = 30;
+
 const styles = {
   mainContainer:{
     flex:1,
-    flexDirection: 'column'
+    flexDirection: 'column',
   },
   headerContainer:{
     flex:1,
@@ -92,6 +103,28 @@ const styles = {
     color:'#242424',
     fontSize: 14
   },
+  accessoryContainer:{
+    position: 'absolute',
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-end',
+    paddingBottom:8,
+    width: deviceWidth,
+    left: deviceWidth - initialDrawerPosition,
+    bottom: 0,
+    zIndex: 100
+  },
+  iconHolder:{
+    flex:1,
+    width:40
+  },
+  accessoryIcon:{
+    color: '#222',
+    fontSize: 24,
+    marginRight: 15,
+    paddingBottom: 7
+  }
 };
 
 class Chats extends BaseComponent {
@@ -100,11 +133,15 @@ class Chats extends BaseComponent {
     super(props);
 
     this.chatHeightSet = false;
+    this.drawerAnimationValue = new Animated.Value(0);
+
   }
 
   state = {
     messages: [],
-    chatViewHeight: deviceHeight - 200
+    chatViewHeight: deviceHeight - 200,
+    inputHeight:  44,
+    mediaDrawerOpened: false
   }
 
   updateMessagesFromProps = () => {
@@ -113,6 +150,22 @@ class Chats extends BaseComponent {
       return;
 
     let messages = Object.keys(this.props.chat.messages).map(key => this.props.chat.messages[key]);
+
+    const myTemporaryMessages = this.props.temporaryMessages.filter( (msg) => {
+
+      // check exists in real messages
+      const exists = messages.find( msg2 => {
+        return msg2._id == msg._id
+      });
+
+      if(exists)
+        return false;
+
+      return msg.chatId == this.props.chatId
+
+    });
+
+    messages = messages.concat(myTemporaryMessages);
 
     // sort
     messages = messages.sort((msg1, msg2) => {
@@ -127,11 +180,15 @@ class Chats extends BaseComponent {
         const messageOwner = this.props.chat.users.find( (user) => {
           return user.userId === message.userId;
         });
+        
+        // build msg obj for gifted chat
 
         const messageObj = {
           _id: message._id,
           text: message.text,
-          createdAt: message.createdAt
+          type: message.type,
+          createdAt: message.createdAt,
+          state: message.state
         };
 
         if(messageOwner){
@@ -150,6 +207,19 @@ class Chats extends BaseComponent {
             name: "err"
           }
         }
+        
+        if(message.type == consts.messageTypePhoto && 
+            message.state != consts.messageStateSending){
+
+          messageObj.text = null;
+
+          if( message.attachment.pictureUrl){
+            messageObj.image = message.attachment.pictureUrl;
+          }else{
+            messageObj.image = message.attachment.thumbnailUrl;
+          }
+
+        }
 
         return messageObj;
 
@@ -162,7 +232,17 @@ class Chats extends BaseComponent {
   componentDidUpdate = (prevProps, prevState) => {
     
     if (prevProps.chat != this.props.chat) {
-      this.updateMessagesFromProps(this.props.chat);
+      this.updateMessagesFromProps(
+        this.props.chat,
+        this.props.temporaryMessages
+      );
+    }
+
+    if (prevProps.temporaryMessages != this.props.temporaryMessages) {
+      this.updateMessagesFromProps(
+        this.props.chat,
+        this.props.temporaryMessages
+      );
     }
 
     if(prevProps.currentTab != this.props.currentTab){
@@ -182,7 +262,8 @@ class Chats extends BaseComponent {
         createdAt: utils.now(),
         text: message.text,
         attachment: {},
-        userId: this.props.user.userId
+        userId: this.props.user.userId,
+        type: consts.messageTypeText
       });
 
     });
@@ -197,11 +278,142 @@ class Chats extends BaseComponent {
     this.props.showUserProfileModal(user._id);
   }
 
+  onInputSizeChanged = (contentSize) => {
+    
+    this.setState({
+      inputHeight:contentSize.height
+    });
+
+  }
+  
+  tuggleMedia = () => {
+
+    let initialValue = this.state.mediaDrawerOpened;
+
+    this.setState({
+      mediaDrawerOpened: !this.state.mediaDrawerOpened
+    });
+    
+    if(!initialValue){
+
+      Animated.timing(
+        this.drawerAnimationValue,
+        {
+          toValue: new Animated.Value(-1 * deviceWidth + initialDrawerPosition),
+          duration: 200, 
+          useNativeDriver: true,
+        }
+      ).start(); 
+
+    } else {
+
+      Animated.timing(
+        this.drawerAnimationValue,
+        {
+          toValue: 0,
+          duration: 200, 
+          useNativeDriver: true,
+        }
+      ).start(); 
+
+    }
+
+
+  }
+
+  getSendingMessage = () => {
+
+    const temporaryMessage = {
+      _id: uuid.v4(),
+      createdAt: utils.now(),
+      text: "sending pic",
+      attachment: {},
+      userId: this.props.user.userId,
+      type: consts.messageTypePhoto,
+      state: consts.messageStateSending,
+      chatId: this.props.chatId
+    };
+
+    return temporaryMessage;
+
+  }
+
+  onCamera = async () => {
+
+    const temporaryMessage = this.getSendingMessage();
+
+    const pic = await ImagePicker.openCamera({
+      width: constant.picSize,
+      height: constant.picSize,
+      cropping: true,
+      includeBase64: true,
+    });
+      
+    this.props.sendPicture(pic,temporaryMessage);
+
+  }
+
+  onPicture = async () => {
+
+    /* sending picture process
+      - show temporary sending message
+      - make small thumbnail
+      - send message with thumbnail
+      - show thumbnail message
+      - send real picture
+    */
+
+    const temporaryMessage = this.getSendingMessage();
+
+    const pic = await ImagePicker.openPicker({
+      width: constant.picSize,
+      height: constant.picSize,
+      cropping: true,
+      includeBase64: true,
+    });
+      
+    this.props.sendPicture(pic,temporaryMessage);
+
+  }
+
+  onVideo = () => {
+    utils.showWarning(l10n('This feature is comming soon!'));
+  }
+
+  onAudio = () => {
+    utils.showWarning(l10n('This feature is comming soon!'));
+  }
+
+  onMap = () => {
+    utils.showWarning(l10n('This feature is comming soon!'));
+  }
+
+  onSticker = () => {
+    utils.showWarning(l10n('This feature is comming soon!'));
+  }
+
+
   render() {
 
     if(!this.props.chat)
       return <View />
       
+    let height = this.state.inputHeight + Platform.select({
+      ios: 11, // see Composer.js
+      android: 3, // see Composer.js
+    });
+
+    if(height < 44)
+      height = 44;
+
+    const accessoryStyle = {
+      ...styles.accessoryContainer,
+      height:height
+    };
+
+    if(this.state.mediaDrawerOpened)
+      accessoryStyle.backgroundColor = '#fff';
+
     return (
       <View style={styles.mainContainer} >
 
@@ -212,6 +424,7 @@ class Chats extends BaseComponent {
               <Icon name='angle-left' type='FontAwesome' style={styles.backButton}/>
             </TouchableOpacity>
           </View>
+
           <View style={styles.headerCenter} >
               <AvatarImage 
                 name={this.props.chat.title}
@@ -224,7 +437,7 @@ class Chats extends BaseComponent {
             
           </View>
         </View>
-      
+
         <View style={styles.chatContainer}>
 
           <GiftedChat
@@ -236,8 +449,80 @@ class Chats extends BaseComponent {
               avatar: this.props.user.photoUrl
             }}
             onPressAvatar={this.onPressAvatar}
+            onInputSizeChanged={this.onInputSizeChanged}
           />
         </View>
+
+        <Animated.View 
+          style={{
+            ...accessoryStyle,
+            transform: [{
+              translateX: this.drawerAnimationValue
+            }]
+          }}>
+          
+
+          <TouchableOpacity 
+            onPress={this.tuggleMedia}>
+            {this.state.mediaDrawerOpened ? 
+              <Icon style={{...styles.accessoryIcon,paddingBottom:5}} name='chevron-right' type="Entypo"/> : 
+              <Icon style={{...styles.accessoryIcon,paddingBottom:5}} name='chevron-left' type="Entypo"/>
+            }
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            onPress={this.onCamera}>
+            <Icon style={{
+                ...styles.accessoryIcon,
+              color:'#999'
+            }} name='camera' type="FontAwesome"/>
+
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            onPress={this.onPicture}>
+            <Icon style={{
+                ...styles.accessoryIcon,
+              color:'#999'
+            }} name='image' type="FontAwesome"/>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            onPress={this.onAudio}>
+            <Icon style={{
+                ...styles.accessoryIcon,
+              color:'#999'
+            }} name='microphone' type="FontAwesome"/>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            onPress={this.onVideo}>
+            <Icon style={{
+                ...styles.accessoryIcon,
+              color:'#999'
+            }} name='video-camera' type="FontAwesome"/>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            onPress={this.onMap}>
+            <Icon style={{
+                ...styles.accessoryIcon,
+              color:'#999'
+            }} name='map' type="FontAwesome"/>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            onPress={this.onSticker}>
+            <Icon style={{
+                ...styles.accessoryIcon,
+              color:'#999'
+            }} name='smile-o' type="FontAwesome"/>
+          </TouchableOpacity>
+
+         
+          
+        </Animated.View>
+
       </View>
     )
 
@@ -249,6 +534,7 @@ const mapStateToProps = state => ({
   chatId: state.chat.currentChatId,
   user: state.auth.currentUser,
   chat: state.chat.currentChat,
+  temporaryMessages: state.chat.temporaryMessages,
   currentTab: state.tab.currentTab
 });
 
@@ -256,6 +542,7 @@ const mapDispatchToProps = (dispatch) => ({
   sendMessage: (message) => dispatch(actions.chat.sendMessage(message)),
   closeChat: () => dispatch(actions.chat.closeChat()),
   showUserProfileModal: (userId) => dispatch(actions.userprofile.ShowUserProfileModal(true,userId)),
+  sendPicture: (pic,msg) => dispatch(actions.chat.sendPicture(pic,msg)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Chats)

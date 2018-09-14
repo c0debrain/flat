@@ -379,6 +379,10 @@ class GiftedChat extends React.Component {
       composerHeight: newComposerHeight,
       messagesContainerHeight: this.prepareMessagesContainerHeight(newMessagesContainerHeight),
     });
+
+    if(this.props.onInputSizeChanged)
+      this.props.onInputSizeChanged(size);
+      
   }
 
   onInputTextChanged(text) {

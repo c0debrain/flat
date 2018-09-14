@@ -466,6 +466,30 @@ export const _sendMessage = async (chatId, message) => {
 
 }
 
+export const _updateMessage = async (chatId, message) => {
+
+  message.updatedAt = firebase.database.ServerValue.TIMESTAMP;
+  const messageRef = firebase.database().ref("/chat/" + chatId + "/messages/" + message._id);
+
+  let writeOnce = true;
+  messageRef.on('value', async (data) => {
+
+    const val = data.val();
+
+    if (!val)
+      return;
+
+    if (writeOnce) {
+      writeOnce = false;
+      await messageRef.set(message);
+    }
+
+    messageRef.off();
+
+  });
+
+}
+
 export const _updateHistoryByMessage = (message) => {
 
 }

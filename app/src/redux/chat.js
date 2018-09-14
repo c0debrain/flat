@@ -34,6 +34,23 @@ export const currentChat = (state = null, action) => {
     }
 }
 
+export const temporaryMessages = (state = [], action) => {
+    switch (action.type) {
+        case types.ChatSendTemporaryMessage:
+            state.push(action.temporaryMessage);
+            return [...state];
+        case types.ChatSendMessage:
+            const newAry = state.filter( msg => {
+                return msg._id != action.message_id
+            });
+
+            return newAry;
+
+        default:
+            return state;
+    }
+}
+
 export const allChat = (state = {}, action) => {
     switch (action.type) {
         case types.ChatLoad:
@@ -73,5 +90,6 @@ export default combineReducers({
     currentChat,
     allChat,
     showNewRoomModal,
-    pushnotificationOpenChatId
+    pushnotificationOpenChatId,
+    temporaryMessages
 });;

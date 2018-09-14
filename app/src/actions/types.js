@@ -30,6 +30,7 @@ export const ChatSendMessage = "Chat/SendMessage";
 export const ChatLoad = "Chat/Load";
 export const ChatNewMessage = 'Chat/NewMessage';
 export const ChatClose = 'Chat/Close';
+export const ChatSendTemporaryMessage = 'Chat/SendemporaryMessage';
 
 export const ChatUpdateCurrent = 'Chat/UpdateCurrent';
 export const SetNewRoomModalVisible = 'NewRoom/SetNewRoomModalVisible';

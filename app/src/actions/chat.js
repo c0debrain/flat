@@ -1,10 +1,18 @@
 import * as types from './types';
+import * as utils from '../lib/myutils';
+import ImageResizer from 'react-native-image-resizer';
 
 import {
-    sendMessage as _b_sendMessage
+    uploadFile
+} from '../lib/backend';
+
+import {
+    sendMessage as _b_sendMessage,
+    updateMessage
 } from '../lib/backend';
 
 import ProfilePool from "../lib/ProfilePool";
+import consts from "../lib/constants";
 
 export function loadChat(chat) {
 
@@ -59,6 +67,8 @@ export function sendMessage(message) {
         // save to db
         const chatId = getState().chat.currentChatId;
 
+        message.state = constant.messageStateSaved;
+
         await _b_sendMessage(chatId, message);
 
         dispatch({
@@ -92,6 +102,64 @@ export function newMessage(newMessages){
 
         });
 
+    }
+
+}
+
+export function sendPicture(pic,temporaryMessage){
+
+    return async (dispatch, getState) => {
+
+        dispatch({
+            type: types.ChatSendTemporaryMessage,
+            temporaryMessage
+        });
+
+        const originalFilePath = pic.path;
+        
+        const imageResizeResult = await ImageResizer.createResizedImage(
+            pic.path, 
+            consts.cacheImageSize, 
+            consts.cacheImageSize, 
+            'JPEG', 
+            80, 
+            0);
+        
+        const thumbnailFilePath = imageResizeResult.path;
+        
+        // upload thumbnail
+        const thumbnailUrl = await uploadFile(thumbnailFilePath, `/avatar/${temporaryMessage._id}_thumb.jpg`);
+
+        if(!temporaryMessage.attachment)
+            temporaryMessage.attachment = {};
+
+        temporaryMessage.attachment.thumbnailUrl = thumbnailUrl;
+        temporaryMessage.state = constant.messageStateSaved;
+
+        // send message
+        const chatId = getState().chat.currentChatId;
+
+        await _b_sendMessage(chatId, temporaryMessage);
+
+        // send message with thumbnail first
+        dispatch({
+            type: types.ChatSendMessage,
+            message:temporaryMessage
+        });
+
+        console.log('uploading pic');
+
+        // upload real pic
+        const picUrl = await uploadFile(originalFilePath, `/avatar/${temporaryMessage._id}.jpg`);
+        temporaryMessage.attachment.pictureUrl = picUrl;
+
+        console.log('uploading pic done');
+
+        await updateMessage(chatId, temporaryMessage);
+
+        console.log('update message done');
+
+        // done sending pic
     }
 
 }

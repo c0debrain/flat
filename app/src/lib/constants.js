@@ -17,5 +17,9 @@ export default constant = {
     },
     picSize: 512,
     picSize: 512,
-    defaultUserName: 'No Name 🐶'
+    defaultUserName: 'No Name 🐶',
+    messageTypeText: 'text',
+    messageTypePhoto: 'photo',
+    messageStateSending: 'sending',
+    messageStateSaved: 'saved'
 }

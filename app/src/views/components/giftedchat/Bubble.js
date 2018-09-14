@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 
 import MessageText from './MessageText';
+import MessageSending from './MessageSending';
 import MessageImage from './MessageImage';
 import Time from './Time';
 import Color from './Color';
@@ -97,6 +98,11 @@ export default class Bubble extends React.Component {
     return null;
   }
 
+  renderSending(){
+    const { containerStyle, wrapperStyle, ...messageProps } = this.props;
+    return <MessageSending {...messageProps} />;
+  }
+
   renderTicks() {
     const { currentMessage } = this.props;
     if (this.props.renderTicks) {
@@ -135,6 +141,9 @@ export default class Bubble extends React.Component {
   }
 
   render() {
+
+    console.log('this.props.currentMessage',this.props.currentMessage);
+
     return (
       <View
         style={[
@@ -156,9 +165,15 @@ export default class Bubble extends React.Component {
             {...this.props.touchableProps}
           >
             <View>
-              {this.renderCustomView()}
-              {this.renderMessageImage()}
-              {this.renderMessageText()}
+              {this.props.currentMessage.state == 'sending' ? 
+                this.renderSending():
+                  <View>
+                    {this.renderCustomView()}
+                    {this.renderMessageImage()}
+                    {this.renderMessageText()}
+                  </View>
+              }
+
               <View style={[styles.bottom, this.props.bottomContainerStyle[this.props.position]]}>
                 {this.renderTime()}
                 {this.renderTicks()}

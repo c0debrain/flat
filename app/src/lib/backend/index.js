@@ -84,3 +84,7 @@ export const createNewConversation = async (params) => {
 export const saveName = async (userId,name) => {
     return await adapter._saveName(userId,name);
 }
+
+export const updateMessage = async (chatId,msg) => {
+    return await adapter._updateMessage(chatId,msg);
+}
