@@ -172,60 +172,63 @@ class Chats extends BaseComponent {
       return msg2.createdAt - msg1.createdAt;
     });
 
+    const messagesToDisplay = messages.map((message) => {
+
+      // get user
+      const messageOwner = this.props.chat.users.find( (user) => {
+        return user.userId === message.userId;
+      });
+      
+      // build msg obj for gifted chat
+
+      const messageObj = {
+        _id: message._id,
+        text: message.text,
+        type: message.type,
+        createdAt: message.createdAt,
+        state: message.state
+      };
+
+      if(messageOwner){
+        messageObj.user = {
+          _id: messageOwner.userId,
+          name: messageOwner.displayName
+        }
+
+        if(messageOwner.photoUrl){
+          messageObj.user.avatar = messageOwner.photoUrl;
+        }
+
+      }else{
+        messageObj.user = {
+          _id: "1",
+          name: "err"
+        }
+      }
+      
+      if(message.type == consts.messageTypePhoto && 
+          message.state != consts.messageStateSending){
+
+        messageObj.text = null;
+
+        if( message.attachment.pictureUrl){
+          messageObj.image = message.attachment.pictureUrl;
+        }else{
+          messageObj.image = message.attachment.thumbnailUrl;
+        }
+
+      }
+
+      return messageObj;
+
+    });
+
     this.setState({
 
-      messages: messages.map((message) => {
+      messages: messagesToDisplay
 
-        // get user
-        const messageOwner = this.props.chat.users.find( (user) => {
-          return user.userId === message.userId;
-        });
-        
-        // build msg obj for gifted chat
+    });
 
-        const messageObj = {
-          _id: message._id,
-          text: message.text,
-          type: message.type,
-          createdAt: message.createdAt,
-          state: message.state
-        };
-
-        if(messageOwner){
-          messageObj.user = {
-            _id: messageOwner.userId,
-            name: messageOwner.displayName
-          }
-
-          if(messageOwner.photoUrl){
-            messageObj.user.avatar = messageOwner.photoUrl;
-          }
-
-        }else{
-          messageObj.user = {
-            _id: "1",
-            name: "err"
-          }
-        }
-        
-        if(message.type == consts.messageTypePhoto && 
-            message.state != consts.messageStateSending){
-
-          messageObj.text = null;
-
-          if( message.attachment.pictureUrl){
-            messageObj.image = message.attachment.pictureUrl;
-          }else{
-            messageObj.image = message.attachment.thumbnailUrl;
-          }
-
-        }
-
-        return messageObj;
-
-      })
-
-    })
 
   }
 

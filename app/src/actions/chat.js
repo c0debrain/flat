@@ -139,7 +139,7 @@ export function sendPicture(pic,temporaryMessage){
         // send message
         const chatId = getState().chat.currentChatId;
 
-        await _b_sendMessage(chatId, temporaryMessage);
+        await _b_sendMessage(chatId, {...temporaryMessage});
 
         // send message with thumbnail first
         dispatch({
@@ -147,17 +147,11 @@ export function sendPicture(pic,temporaryMessage){
             message:temporaryMessage
         });
 
-        console.log('uploading pic');
-
         // upload real pic
         const picUrl = await uploadFile(originalFilePath, `/avatar/${temporaryMessage._id}.jpg`);
         temporaryMessage.attachment.pictureUrl = picUrl;
 
-        console.log('uploading pic done');
-
-        await updateMessage(chatId, temporaryMessage);
-
-        console.log('update message done');
+        await updateMessage(chatId, {...temporaryMessage});
 
         // done sending pic
     }

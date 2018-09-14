@@ -142,8 +142,6 @@ export default class Bubble extends React.Component {
 
   render() {
 
-    console.log('this.props.currentMessage',this.props.currentMessage);
-
     return (
       <View
         style={[
