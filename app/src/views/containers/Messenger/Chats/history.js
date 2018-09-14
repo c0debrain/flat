@@ -30,8 +30,10 @@ import DateTime from "../../../components/DateTime";
 import BaseComponent from "../../BaseContainer";
 import NewRoomModal from "./NewRoomModal";
 
+import {l10n} from "../../../../lib/lang";
 import * as actions from "../../../../actions";
 import ProfilePool from "../../../../lib/ProfilePool";
+import consts from "../../../../lib/constants";
 
 const deviceHeight = Dimensions.get("window").height;
 const deviceWidth = Dimensions.get("window").width;
@@ -225,7 +227,8 @@ class Chats extends BaseComponent {
         lastMessage: {
           text: chat.lastMessage ? chat.lastMessage.text : "",
           date: chat.lastUpdate,
-          userId: chat.lastMessage ? chat.lastMessage.userId : null
+          userId: chat.lastMessage ? chat.lastMessage.userId : null,
+          type: chat.lastMessage ? chat.lastMessage.type : null,
         }
       };
 
@@ -310,6 +313,15 @@ class Chats extends BaseComponent {
 
   }
 
+  getMessageLabel = (item) => {
+
+    if(item.lastMessage.type == consts.messageTypePhoto)
+      return l10n(' Sent Photo');
+
+    return item.lastMessage.text;
+
+  }
+
   render() {
 
     this.filterList(this.state.keyword);
@@ -367,8 +379,8 @@ class Chats extends BaseComponent {
                               source={item.lastMessage.user.photoUrl} /> : null
                           }
                         {this.checkUnread(item) ? 
-                          <Text style={styles.listViewLastMessageBold} note numberOfLines={1}>{item.lastMessage.text}</Text>:
-                          <Text style={styles.listViewLastMessage} note numberOfLines={1}>{item.lastMessage.text}</Text>
+                          <Text style={styles.listViewLastMessageBold} note numberOfLines={1}>{this.getMessageLabel(item)}</Text>:
+                          <Text style={styles.listViewLastMessage} note numberOfLines={1}>{this.getMessageLabel(item)}</Text>
                         }
 
                       </View> : null

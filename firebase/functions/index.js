@@ -55,18 +55,29 @@ exports.onNewMessage = functions.database
     const senderUserId = newMessage.userId;
 
     const collection = firestore.collection("profiles");
+    
     collection.where("userId", "=", senderUserId).get().then( (querySnapshot) => {
 
         if (querySnapshot.size === 0)
             return Promise.resolve();
 
+        console.log("newMessage",newMessage);
+
         const userData = querySnapshot.docs[0].data();
 
-            // Notification details.
+        let title = userData.displayName + " sent a message ";
+        let body = newMessage.text;
+
+        if(newMessage.type === 'photo'){
+            title = userData.displayName + " sent a photo ";
+            body = "Photo Message";
+        }
+
+        // Notification details.
         const payload = {
             notification: {
-                title: userData.displayName + " sent a message ",
-                body: newMessage.text,
+                title: title,
+                body: body,
             },
             data: {
                 chatId: String(context.params.chatId),

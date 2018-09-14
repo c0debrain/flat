@@ -329,7 +329,7 @@ class Chats extends BaseComponent {
     const temporaryMessage = {
       _id: uuid.v4(),
       createdAt: utils.now(),
-      text: "sending pic",
+      text: null,
       attachment: {},
       userId: this.props.user.userId,
       type: consts.messageTypePhoto,

@@ -17,7 +17,7 @@ export default class MessageImage extends React.Component {
     super(props);
   }
 
-  componentWillMount = () => {
+  showImageFromCache = () => {
 
     if(!this.props.currentMessage.image)
       return;
@@ -58,6 +58,20 @@ export default class MessageImage extends React.Component {
 
     })();
 
+  }
+
+  componentDidUpdate = (prevProps,prevState) => {
+
+    if(prevProps.currentMessage.image != this.props.currentMessage.image){
+      this.showImageFromCache();
+    }
+
+  }
+
+  componentWillMount = () => {
+
+    this.showImageFromCache();
+    
   }
 
   render() {
