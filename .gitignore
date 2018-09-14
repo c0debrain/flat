@@ -37,6 +37,7 @@ app/ios/Pods
 app/android/app/build
 app/android/.idea
 app/android/.gradle
+app/android/gradle.properties
 *.iml
 
 # node.js
@@ -55,3 +56,6 @@ package-lock.json
 app/ios/GoogleService-Info.plist
 app/android/app/google-services.json
 cli/serviceAccountKey.json
+
+# keys
+docs/keys
